@@ -1,17 +1,71 @@
 \chapter{\IfLanguageName{dutch}{Stand van zaken}{State of the art}}
 \label{ch:stand-van-zaken}
+Zoals eerder werd aangegeven zal dit onderzoek zich hoofdzakelijk focussen op de technologieën gRPC, NodeJS en .Net 5. Vooraleer we verder gaan en het uitgevoerd proces bespreken is het van noodzakelijk belang om eerst enkele technologieën te verhelderen en hun achtergrond wat te schetsen. Eerst bespreken we Protocol Buffers en http2, twee technologieën die aan de basis liggen van gRPC's performantie en functionaliteit. Vervolgens bespreken we het RPC concept en Google's implementatie, gRPC. Als laatst bespreken de twee programmeertalen waarrond het onderzoek gebaseerd is. De talen NodeJS en .Net 5 zullen niet even diep gaan als mogelijk omdat dat dit niet het punt is van dit onderzoek.
+\section{Protocol Buffers}
+Een Protocol Buffer, kortweg Protobuf, is een door Google ontwikkelde methode voor het serialiseren van gestructureerd data. Protobuf kende zijn eerste release in 2008 en werd ontwikkeld om de influx van berichten op Google's netwerk wat te verlichten. Enkele vergelijkbare methoden zijn Extensible Markup Language (XML) en JavaScript Object Notation (JSON). Simpliciteit en performantie zijn de door Google benadrukte punten van Protobuf de Google als het ook specifiek werd ontwikkeld om kleiner en sneller dan XML te zijn. Vandaag de dag ligt Protobuf aan de basis van Google's eigen Remote Procedure Call netwerk en wordt het gebruikt bij alle intermachinale communicatie bij Google. \\
+Protocol Buffers spelen een grote rol in het gRPC verhaal omdat ze deels zorgen de snelheid en het universele van gRPC. Gebruik maken van Protocol Buffers is zeer snel en heeft maar 2 simpele stappen.\\
+Eerst definieer je alle berichten in een .proto bestand. In dit voorbeeld en onderzoek wordt de laatste versie, namelijk proto3, gebruikt voor het opstellen van de .proto bestanden. Een gedefinieerd bericht ziet er als volgt uit. [protofoto]\\
+Vervolgens genereer je code in de gewenste taal via een Google's ``protocol buffer compiler''. Zo kan je bijvoorbeeld C++ code genereren. [protofoto]\\
+Als laatst importeer je de gegenereerde code zodat het programma klaar is om de omschreven berichten te versturen en verkrijgen. [protofoto]\\
+Als je kijkt naar het onderlijnd gedeelte van de bovenstaande foto kan je zien dat Protobuf-specifieke types worden gebruikt. Dit wil zeggen dat de velden in een bericht van en naar een proto-objecten worden omgezet. De snelheid van deze omzetting is afhankelijk van de taal, zo kan proto naar NodeJS mogelijks trager zijn dan proto naar C++. Hier zal later dieper op in worden gegaan.
+\section{Http/2}
+Http, wat staat voor Hyper Transfer Text Protocol, is gemaakt voor het aanvragen en versturen van data en is de basis van alle datacommunicatie op het wereldwijd web. Http is een client-server protocol wat wil zeggen dat verzoeken door de ontvanger worden geïnitieerd wat meestal een webbrowser is.Tim Berners-Lee zorgde in 1989 voor de eerste definitie van http en daarmee ook de ontwikkeling. Versie 0.9 kwam in 1991 uit, 1.0 in 1996, 1.1 in 1997 en 2.0 in 2015. Veel hoeft er niet gezegd worden over de verschillen tussen alle http versies buiten dat de sprong van 1.1 naar 2.0 voor een beter gebruik van TCP zorgt en bi-directionele communicatie mogelijk maakt.\\
+TCP.\\
+bi-directioneel.
+\section{Remote Procedure Call}
+Remote Procedure Call, kortweg RPC, is de overdracht van controle tussen computerprogramma's die op een apart adres worden uitgevoerd. Voor dat RPC concreet werd vastgesteld bestonden er al enkele Remote Procedure mechanismen die net hetzelfde nut vervolledigde. In 1981 brachten Birrel en Nelson een oplossing aan de verschillende zwakke Remote Procedure mechanismen in de vorm van RPC \autocite{Nelson1982}. Dit artikel bespreekt het RPC concept volledig en legt een minimum aan vijf voorwaarden op waar frameworks aan moeten voldoen vooraleer ze als RPC framework beschouwd worden. Deze vijf voorwaarden gelden als volgt:
+\begin{itemize}
+    \item Uniform call semantics
+    \item Binding and configuration
+    \item Strong typechecking
+    \item Parameter functionality
+    \item Concurrency \& exception control
+\end{itemize}
+Vooraleer we de werking van RPC bespreken nemen we eerst een kijkje naar het gelijkaardige Local Procedure Call (LPC). Het concept achter LPC is dat een oproepend proces werk doorgeeft aan een verwerkend proces. Het oproepend proces geeft vervolgens controle aan het verwerkend proces en blokkeert zichzelf afwachtend op een antwoord. Bij LPC bevinden beide processen zich op eenzelfde computer.\\
+Bij RPC spreken we van een \textit{client} computer en een \textit{server} computer. Gelijkaardig aan LPC stuurt de \textit{client} een oproepbericht naar de \textit{server} en wacht hij op een antwoord. Het is de intentie van RPC dat de \textit{client} en \textit{server} twee verschillende computers zijn en zich op een andere locatie begeven. De \textit{client} heeft voorkennis nodig over het adres van de \textit{server}, de beschikbare processen en de nodige argumenten. Het is dus onmogelijk om eender welk oproepbericht te versturen met hoop op een logisch resultaat. De \textit{server} heeft een zogezegd luisterend oor proces nodig dat permanent luistert naar een aangewezen poort om oproepen op te vangen en uit te voeren.\\
+Een meer gestructureerde en realistischer voorbeeld van de werking van RPC:
+\begin{steps}
+    \item Client heeft een proces dat een uitwendige verwerking moet doen. Hiervoor spreekt het proces het bijhorend eindpunt aan met de nodige parameters en pauzeert het zichzelf.
+    \item Clienteindpunt verpakt de parameters in een bericht en stuurt deze naar de transportlaag van het systeem.
+    \item Clientsysteem verstuurt het bericht naar het gewenste IP-adres en poort.
+    \item Serversysteem stuurt het bericht door naar het gepaste eindpunt.
+    \item Servereindpunt pakt het bericht uit om de nodige parameters te bekomen. Deze initialiseert vervolgens een nieuw proces met de nodige parameters.
+    \item Serverproces verwerkt de gegevens en stuurt een resultaat terug naar het eindpunt.
+    \item Servereindpunt pakt het resultaat in en stuurt deze naar zijn transportlaag.
+    \item Serversysteem stuurt het  het gewenste IP-adres en poort.
+    \item Clientsysteem stuurt het bericht door naar het gepaste eindpunt.
+    \item Clienteindpunt pakt het bericht uit, hervat het gepauzeerd proces en geeft het resultaat door.
+\end{steps}
+\begin{center}
+    \includegraphics[width=12cm]{RPC-Diagram}
+\end{center}
+Sinds de concrete vaststelling van het RPC concept en vereisten in 1981 zijn er heel wat populaire uitvoeringen naar boven gekomen zoals  Apache's Avro (https://avro.apache.org/) in 2009, Google's gRPC (https://grpc.io/) in 2016 en Apache's Thrift (https://thrift.apache.org/) in 2019. Uit deze literatuurstudie blijkt spijtig genoeg dat er geen vergelijkend onderzoek gevoerd werd tussen verschillende RPC frameworks.
+\section{gRPC}
+Het gRPC framework is Google zijn eigen open source, performante en universele RPC framework. Voor maart 2015 gebruikte Google het Stubby RPC framework voor grootschalige communicatie, maart 2015 werd dit programma beschikbaar voor iedereen onder het open source project genaamd gRPC. 
+%(https://cloud.google.com/blog/products/gcp/grpc-a-true-internet-scale-rpc-framework-is-now-1-and-ready-for-production-deployments)
+Vandaag de dag wordt gRPC door een tal internetgiganten gebruikt waaronder Netflix en Cisco.
+Het gRPC framework is gemaakt met performantie en gemak in gedachten, het maakt verbinden, bedienen en debuggen van gedistribueerde gemakkelijker. Ook zorgt gRPC voor zaken zoals data serialisatie, efficiënte netwerk communicatie, authenticatie en toegangscontrole. Er zijn enkele features en pluspunten dat gRPC laat uitblinken. Een van deze positieve punten is het grote aantal officieel ondersteunde talen, het ondersteund 10 populaire talen waaronder C\#, C++, Java, NodeJS, PHP en Python. Er werden geen artikelen gevonden die gRPC met andere frameworks vergelijken of die performantie van de ondersteunde talen testen.
 
-% Tip: Begin elk hoofdstuk met een paragraaf inleiding die beschrijft hoe
-% dit hoofdstuk past binnen het geheel van de bachelorproef. Geef in het
-% bijzonder aan wat de link is met het vorige en volgende hoofdstuk.
+Een pluspunt dat niet specifiek is aan gRPC maar toch vermeld mag worden is het gebruik van Google's Protobuf, een  taal ontwikkel voor het serialiseren van gestructureerde data (zie sectie 2.3).\\
+Het meest onderscheidende feature van gRPC is de mogelijkheid voor bi-directionele communicatie door middel van http/2 (zie sectie 2.4).
 
-% Pas na deze inleidende paragraaf komt de eerste sectiehoofding.
+\section{NodeJS}
+In 1995, zeven jaar na de geboorte van het wereldwijd web, kwam JavaScript zijn eerste versie uit onder de naam 'Mocha'. De taal JavaScript, kortweg JS, is een programmeertaal dat je toelaat om allerlei complexe en/of interactieve elementen te implementeren op een webpagina. Denk dan maar aan cookies die je activiteit doorsturen of het live updaten van je chatvenster. De procesverwerking voor zulke JS taken gebeurt namelijk in de browser van jouw computer. Rond het jaartal 2009 was er een grote nood server-side JavaScript omgevingen om zowel de browsers minder te belasten als allerlei nieuwe JS mogelijkheden te creëren. In 2009 kwam Ryan Dahl en zijn collega's met de eerste uitgave van het JS-runtime-omgeving, een omgeving gemaakt voor het uitvoeren van JS code, NodeJS gebouwd op Google Chrome's 'V8 JavaScript Engine'. Vandaag de dag is NodeJS werelds beroemdste JS-runtime-omgeving, een omgeving gemaakt voor het uitvoeren van JS code buiten een webbrowser.
 
-Dit hoofdstuk bevat je literatuurstudie. De inhoud gaat verder op de inleiding, maar zal het onderwerp van de bachelorproef *diepgaand* uitspitten. De bedoeling is dat de lezer na lezing van dit hoofdstuk helemaal op de hoogte is van de huidige stand van zaken (state-of-the-art) in het onderzoeksdomein. Iemand die niet vertrouwd is met het onderwerp, weet nu voldoende om de rest van het verhaal te kunnen volgen, zonder dat die er nog andere informatie moet over opzoeken \autocite{Pollefliet2011}.
+Typescript is een open-source taal dat verder op JavaScript bouwt. Het 
+\\werking
+\section{.NET 5}
+Microsofts .NET is een gratis open-source framework voor het ontwikkelen van verschillende soorten applicaties zoals webapplicaties, mobiele applicaties, videospellen, API en nog veel meer. Het is Microsofts cross-platform alternatief voor .NET Framework wat enkel voor het Windows platform dient. Het .NET framework biedt de mogelijkheid om gebruik te maken van de programmeertalen C\#, F\# en Visual Basic. In dit onderzoek zal C\# gebruikt worden voor het schrijven van het API.
+\\werking
 
+Er worden twee API's gebruikt in dit onderzoek, beiden maken gebruik van een verschillend framework en programmeertaal. 
+De twee API's die gebruikt worden zijn NodeJS geschreven in Typescript en .NET 5 geschreven in C\#.
+
+\section{..}
+bespreken van ..
+
+\section{BS}
 Je verwijst bij elke bewering die je doet, vakterm die je introduceert, enz. naar je bronnen. In \LaTeX{} kan dat met het commando \texttt{$\backslash${textcite\{\}}} of \texttt{$\backslash${autocite\{\}}}. Als argument van het commando geef je de ``sleutel'' van een ``record'' in een bibliografische databank in het Bib\LaTeX{}-formaat (een tekstbestand). Als je expliciet naar de auteur verwijst in de zin, gebruik je \texttt{$\backslash${}textcite\{\}}.
 Soms wil je de auteur niet expliciet vernoemen, dan gebruik je \texttt{$\backslash${}autocite\{\}}. In de volgende paragraaf een voorbeeld van elk.
 
 \textcite{Knuth1998} schreef een van de standaardwerken over sorteer- en zoekalgoritmen. Experten zijn het erover eens dat cloud computing een interessante opportuniteit vormen, zowel voor gebruikers als voor dienstverleners op vlak van informatietechnologie~\autocite{Creeger2009}.
-
-\lipsum[7-20]

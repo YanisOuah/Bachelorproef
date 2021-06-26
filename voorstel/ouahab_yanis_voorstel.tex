@@ -1,0 +1,97 @@
+%==============================================================================
+% Sjabloon onderzoeksvoorstel bachelorproef
+%==============================================================================
+% Gebaseerd op LaTeX-sjabloon ‘Stylish Article’ (zie voorstel.cls)
+% Auteur: Jens Buysse, Bert Van Vreckem
+%
+% Compileren in TeXstudio:
+%
+% - Zorg dat Biber de bibliografie compileert (en niet Biblatex)
+%   Options > Configure > Build > Default Bibliography Tool: "txs:///biber"
+% - F5 om te compileren en het resultaat te bekijken.
+% - Als de bibliografie niet zichtbaar is, probeer dan F5 - F8 - F5
+%   Met F8 compileer je de bibliografie apart.
+%
+% Als je JabRef gebruikt voor het bijhouden van de bibliografie, zorg dan
+% dat je in ``biblatex''-modus opslaat: File > Switch to BibLaTeX mode.
+
+\documentclass{voorstel}
+
+\usepackage{lipsum}
+\graphicspath{ {./} }
+
+%------------------------------------------------------------------------------
+% Metadata over het voorstel
+%------------------------------------------------------------------------------
+
+%---------- Titel & auteur ----------------------------------------------------
+
+% TODO: geef werktitel van je eigen voorstel op
+\PaperTitle{Vergelijkende studie van Node.js en .net Core 3.0 voor big data API met grpc framework.}
+\PaperType{Onderzoeksvoorstel Bachelorproef 2019-2020} % Type document
+
+% TODO: vul je eigen naam in als auteur, geef ook je emailadres mee!
+\Authors{Yanis Ouahab\textsuperscript{1}} % Authors
+\CoPromotor{Peter Van Dender\textsuperscript{2} (Lansweeper)}
+\affiliation{\textbf{Contact:}
+  \textsuperscript{1} \href{mailto:yanisouah@gmail.com}{yanisouah@gmail.com};
+  \textsuperscript{2} \href{mailto:peter.van.dender@lansweeper.com}{peter.van.dender@lansweeper.com};
+}
+
+%---------- Abstract ----------------------------------------------------------
+
+\Abstract{In dit onderzoek zal er gezocht worden naar de beste technologische keuze voor het hosten van een gRPC API. GRPC is een open source Remote Procedure Call systeem dat oorspronkelijk ontwikkeld werd bij Google in 2015. Het framework heeft nog steeds geen duidelijke beste keuze op vlak van hosting opties. In dit onderzoek zullen de talen 'Node.js' en '.net Core' vergeleken worden. Tijdens het onderzoek zullen 2 backend omgevingen worden opgesteld, één op basis van .net Core en één op basis van Node.js. Vervolgens zal er aan unit testing en load testing gedaan worden voor het vergelijken van de twee. De bekomen test data zal een beter beeld scheppen over welk van de twee talen het best gebruikt wordt bij gRPC. \break 
+Peter Van Dender en Koen Plasmans van het bedrijf Lansweeper zullen me bijstaan in dit onderzoek. Lansweeper ligt in Dendermonde en is verantwoordelijk voor het asset management scanning programma 'Lansweeper'.
+}
+
+%---------- Onderzoeksdomein en sleutelwoorden --------------------------------
+% TODO: Sleutelwoorden:
+%
+% Het eerste sleutelwoord beschrijft het onderzoeksdomein. Je kan kiezen uit
+% deze lijst:
+%
+% - Mobiele applicatieontwikkeling
+% - Webapplicatieontwikkeling
+% - Applicatieontwikkeling (andere)
+% - Systeembeheer
+% - Netwerkbeheer
+% - Mainframe
+% - E-business
+% - Databanken en big data
+% - Machineleertechnieken en kunstmatige intelligentie
+% - Andere (specifieer)
+%
+% De andere sleutelwoorden zijn vrij te kiezen
+
+\Keywords{Databanken en big data --- gRPC --- Node.js --- .net Core 3.0} % Keywords
+\newcommand{\keywordname}{Sleutelwoorden} % Defines the keywords heading name
+
+%---------- Titel, inhoud -----------------------------------------------------
+
+\begin{document}
+
+\flushbottom % Makes all text pages the same height
+\maketitle % Print the title and abstract box
+\tableofcontents % Print the contents section
+\thispagestyle{empty} % Removes page numbering from the first page
+
+%------------------------------------------------------------------------------
+% Hoofdtekst
+%------------------------------------------------------------------------------
+
+% De hoofdtekst van het voorstel zit in een apart bestand, zodat het makkelijk
+% kan opgenomen worden in de bijlagen van de bachelorproef zelf.
+\input{voorstel-inhoud}
+
+%------------------------------------------------------------------------------
+% Referentielijst
+%------------------------------------------------------------------------------
+% TODO: de gerefereerde werken moeten in BibTeX-bestand ``voorstel.bib''
+% voorkomen. Gebruik JabRef om je bibliografie bij te houden en vergeet niet
+% om compatibiliteit met Biber/BibLaTeX aan te zetten (File > Switch to
+% BibLaTeX mode)
+
+\phantomsection
+\printbibliography[heading=bibintoc]
+
+\end{document}
